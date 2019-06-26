@@ -1,2 +1,2 @@
 # BirFikrimVar
-Daha Sonra Yazılacak Açıklama
+Fikir alış-verişi ve hızlı bilgiye erişim için oluşturulan sosyal platform projesidir.
