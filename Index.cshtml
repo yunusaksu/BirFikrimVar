@@ -1,0 +1,49 @@
+﻿@model List<FikrimVar.Mesaj>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Tüm Mesajlar</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            Mesaj Başlık
+        </th>
+        <th>
+            Mesaj İçerik
+        </th>
+        <th>
+            Kategorisi
+        </th>
+        <th>
+            Yollayan Kişi
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.MesajBaslik)
+            </td>
+            <td>
+                @item.MesajIcerik.Substring(0, 20)
+                <a href="/Home/DetailMessage/@item.MesajID">..devamı için tıkla.</a>
+                @* <a href="/a/a/@item.MesajID"></a> *@
+                @*
+                    @Html.DisplayFor(modelItem => item.MesajIcerik)
+                *@
+            </td>
+            <td>
+                @item.Kategori.KategoriAdi
+            </td>
+            <td>
+                @item.Uye.UyeAdi
+            </td>
+        </tr>
+    }
+
+</table>

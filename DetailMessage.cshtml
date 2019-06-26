@@ -1,0 +1,30 @@
+﻿@model FikrimVar.Mesaj
+
+@{
+    ViewBag.Title = "Mesaj Detayi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Mesajın Detayi</h2>
+
+<div>
+
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+
+        </dt>
+
+        <dd>
+            <h4> @Html.DisplayFor(model => model.MesajBaslik) </h4>
+        </dd>
+
+        <dt>
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.MesajIcerik)
+        </dd>
+
+    </dl>
+</div>
