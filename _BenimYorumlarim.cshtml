@@ -1,0 +1,130 @@
+﻿@model  IQueryable<FikrimVar.Models.Yorumum>
+@using FikrimVar.Models;
+
+
+@if (Model != null)
+{
+    foreach (Yorumum yorum in Model)
+    {
+        <div class="row" style="width: 100.3%; border-bottom: 1px solid #d2cece; margin-right: -14px; margin-left: -1px;">
+            <div class="col-md-4" style="width: 21%;">
+                <div class="userProfil" style="margin-left: 9px; margin-top: 12px;">
+
+                    <a href="#" style="margin-left: 5px; font-weight: bold; font-size: 13px;"> @yorum.Kullancilar.KullaniciAdi </a>
+                </div>
+            </div>
+            <div class="col-md-7" style="width: 60%;">
+                <div class="commentDetails">
+                    <p style="margin-top: 27px; font-size: 13px; color: #9c9898;"> @yorum.YorumMessage </p>
+                    <a href="#" class="Reply" data-id="@yorum.YorumID">Cevap</a>
+                    <div class="@string.Format("{0}_{1}", "ReplayComments", yorum.YorumID)" style="display:none;">
+
+                        <div class="ReplayCommentInput" style="margin-left: 3%;  margin-bottom: 5px; margin-top: 8px;">
+                            <input type="text" id="@string.Format("{0}_{1}", "inputReplay", yorum.YorumID)" class="form-control" placeholder="Add a Comment ..." style="display: inline;" />
+
+                            <button type="button"
+                                    class="btn btn-default
+                                    ReplyAddComment"
+                                    data-id="@yorum.YorumID">
+                                
+                                <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
+                            
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1" style="width: 19%;">
+                <div class="commentDate">
+                    <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+                    <time class="timeago" style="margin-top: 27px; font-size: 13px; color: #9c9898;  margin-left: 4px;" datetime="@yorum.YorumZamani">@yorum.YorumZamani</time>
+
+                </div>
+            </div>
+        </div>
+
+    }
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        //Get All ReplyComment
+        $('.Reply').on('click', function () {
+
+            var YorumId = $(this).attr('data-id');
+            //alert(ComID);
+            $.ajax({
+                
+                type: 'GET',
+                url: '@Url.Action("GetAltYorum", "Yorum")',
+                data: { YorumId },
+                success: function (response) {
+
+                    if ($('div').hasClass('zoneReply_' + YorumId + ''))
+                    {
+                        $('div [class=zoneReply_' + YorumId + ']').remove();
+                    }
+
+                    var selReply = $("<div>").addClass('zoneReply_' + YorumId);
+
+                    selReply.append(response);
+                    selReply.prependTo($('.ReplayComments_' + YorumId));
+
+                    $('.ReplayComments_' + YorumId).show();
+
+                },
+                error: function (response) {
+                    alert('something Wrong');
+                }
+            });
+
+        });
+
+        //Add Reply Comment
+        $('.ReplyAddComment').on('click', function () {
+
+            var ComID = $(this).attr('data-id');
+            var AltYorumMesaji = $('#inputReplay_' + ComID).val();
+            var YorumZamani = new Date();
+
+            var altYorum = {
+                AltYorumMesaji: AltYorumMesaji,
+                YorumZamani: YorumZamani.toLocaleString()
+            };
+
+
+            $.ajax({
+
+                type: 'POST',
+                url: '@Url.Action("AddSubComment", "Yorum")',
+                data: { altYorum, ComID },
+                success: function (response) {
+
+                    if ($('div').hasClass('zoneReply_' + ComID + '')) {
+                        $('div [class=zoneReply_' + ComID + ']').remove();
+                    }
+
+                    var selReply = $("<div>").addClass('zoneReply_' + ComID);
+
+                    selReply.append(response);
+                    selReply.prependTo($('.ReplayComments_' + ComID));
+
+                    $('.ReplayComments_' + ComID).show();
+
+                },
+                error: function (response) {
+                    alert('something Wrong');
+                }
+            });
+
+        });
+
+        jQuery("time.timeago").timeago();
+
+
+    })
+
+
+</script>
