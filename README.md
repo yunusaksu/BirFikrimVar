@@ -1,2 +1,2 @@
 # BirFikrimVar
-Fikir alış-verişi ve hızlı bilgiye erişim için oluşturulan sosyal platform projesidir.
+It is a social platform project created for exchanging ideas and accessing fast information.
