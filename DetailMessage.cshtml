@@ -1,30 +1,175 @@
-﻿@model FikrimVar.Mesaj
+@model FikrimVar.Mesaj
 
 @{
     ViewBag.Title = "Mesaj Detayi";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    MesajimVarEntities entities = new MesajimVarEntities();
+    var likeCount = entities.Like.Where(p => p.PostId == Model.MesajID).Count();
+    var dislikeCount = entities.Dislike.Where(p => p.PostId == Model.MesajID).Count();
 }
+<div class="panel panel-default" style="width: 80%;">
+    <div class="panel-body">
+        <div class="postMessage" style="margin-top: 11px; margin-left: 9px;">
+            <span class="label label-warning"> @string.Format("Post #{0}{1}", Model.MesajID, Model.MesajBaslik) </span><br />
+            <p class="message">
+                @Model.MesajIcerik
+            </p>
+        </div>
+    </div>
+    <div>
+        <button type="button" class="btn btn-warning Like" data-id="@Model.MesajID">Like</button>
+        <span class="Likes">@likeCount</span>
+        <button type="button" class="btn btn-danger Dislike" data-id="@Model.MesajID">DisLike</button>
+        <span class="Dislikes">@dislikeCount</span>
 
-<h2>Mesajın Detayi</h2>
+    </div>
+    <div class="panel-footer">
+        <button type="button" class="btn btn-default Comment" data-id="@Model.MesajID" value="Comment">
+            <span class="glyphicon glyphicon-comment" aria-hidden="true"></span> Yorum
+        </button>
+    </div>
 
-<div>
+    <div id="@string.Format("{0}_{1}","commentsBlock", Model.MesajID)" style="border: 1px solid #f1eaea; background-color: #eaf2ff;">
 
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
 
-        </dt>
+        <div class="AddComment" style="margin-left: 30%;  margin-bottom: 5px; margin-top: 8px;">
+            <input type="text" id="@string.Format("{0}_{1}", "yorum", Model.MesajID)" class="form-control" placeholder="Bir yorum ekle ..." style="display: inline;" />
+            <button type="button" class="btn btn-default addComment" data-id="@Model.MesajID"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span></button>
+        </div>
 
-        <dd>
-            <h4> @Html.DisplayFor(model => model.MesajBaslik) </h4>
-        </dd>
+    </div>
 
-        <dt>
-        </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.MesajIcerik)
-        </dd>
 
-    </dl>
 </div>
+
+@section Scripts
+{
+
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+
+                $('.Like').on('click', function () {
+                var id = $(this).attr("data-id");
+
+                $.ajax({
+
+                    type: 'POST',
+                    url: "/Yorum/Like",
+                    data: { postId: id, userId: @int.Parse(TempData.Peek("userid").ToString()) },
+                    success: function (data) {
+                        if (data.result == @likeCount && data.result3 != undefined)
+                            alert(data.result3);
+                        $('.Likes').html("" + data.result);
+                        // $('.Likes').html("result:" + data.result);
+                        $('.Dislikes').html("" + data.result2);
+                    },
+                    error: function (data) {
+                        alert("Someting wrong");
+                    }
+                })
+            });
+
+
+              $('.Dislike').on('click', function () {
+                var id = $(this).attr("data-id");
+
+                $.ajax({
+
+                    type: 'POST',
+                    url: "/Yorum/Dislike",
+                    data: { postId: id, userId: @int.Parse(TempData.Peek("userid").ToString()) },
+                    success: function (data) {
+                        if (data.result2 == @dislikeCount && data.result3 != undefined)
+                            alert(data.result3);
+                        $('.Likes').html("" + data.result);
+                        // $('.Likes').html("result:" + data.result);
+                        $('.Dislikes').html("" + data.result2);
+                    },
+                    error: function (data) {
+                        alert("Someting wrong");
+                    }
+                })
+            });
+
+
+            //Click Comment
+            $('.Comment').on('click', function () {
+
+                var id = $(this).attr("data-id");
+                var allCommentsArea = $('<div>').addClass('allComments_' + id);
+
+                //function that allow us to get all comments related to post id
+                $.ajax({
+
+                    type: 'GET',
+                    url: '@Url.Action("GetComments", "Yorum")',
+                    data: { postId: id },
+                    success: function (response) {
+
+                        if ($('div').hasClass('allComments_' + id + ''))
+                        {
+                            $('div[class=allComments_' + id + ']').remove();
+                        }
+                        //console.log(response);
+
+
+                        allCommentsArea.html(response);
+                        allCommentsArea.prependTo('#commentsBlock_' + id);
+
+
+                    },
+                    error: function (response) {
+                        alert('Sorry: Comments cannot be loaded !');
+                    }
+
+
+                })
+
+            });
+
+            //Add New Comment
+            $('.addComment').on('click', function () {
+
+                var postId = $(this).attr('data-id');
+                var commentMsg = $('#yorum_' + postId).val();
+                var dateTimeNow = new Date();
+
+                var yorum = {
+                    YorumMessage: commentMsg,
+                    YorumZamani: dateTimeNow.toLocaleString()
+                };
+
+                $.ajax({
+
+                    type: 'POST',
+                    url: '@Url.Action("AddComment", "Yorum")',
+                    data: { yorum, postId },
+                    success: function (response) {
+
+                        $('div[class=allComments_' + postId + ']').remove();
+
+                        var allCommentsArea = $('<div>').addClass('allComments_' + postId);
+                        allCommentsArea.html(response);
+
+                        allCommentsArea.prependTo('#commentsBlock_' + postId);
+
+                    },
+                    error: function (response) {
+                        alert('Sorry: Something Wrong');
+                    }
+
+                });
+
+            });
+
+            jQuery("time.timeago").timeago();
+
+        });
+
+    </script>
+
+
+}
