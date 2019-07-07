@@ -1,4 +1,4 @@
-﻿using FikrimVar.Models;
+using FikrimVar.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -114,5 +114,74 @@ namespace FikrimVar.Controllers
             return RedirectToAction("GetAltYorum", "Yorum", new { YorumId = ComID });
 
         }
+
+        public JsonResult Like(int postId, int userId)
+        {
+            var dahaOnceDislikeVarMi = entities.Dislike.Where(x => x.PostId == postId).Any(x => x.UserId == userId);
+            var dahaOnceLikeVarMi = entities.Like.Where(x => x.PostId == postId).Any(x => x.UserId == userId);
+            if (dahaOnceLikeVarMi == false)
+            {
+                Like like = new Like { PostId = postId, UserId = userId };
+                entities.Like.Add(like);
+                entities.SaveChanges();
+                var sum = entities.Like.Where(x => x.PostId == postId).Count(); // postId'sı bu olan mesajı kaç farklı kullanıcı beğenmiş demektir bu kullanım.
+                if (dahaOnceDislikeVarMi == true)
+                {
+                    var dahaOncekiDislikenDislikeIdsi = entities.Dislike.FirstOrDefault(x => x.UserId == userId && x.PostId == postId).DislikeID;
+                    var eskidislike = entities.Dislike.Where(x => x.DislikeID == dahaOncekiDislikenDislikeIdsi).Single(); // dislike entitisini sectik
+                    entities.Dislike.Remove(eskidislike);
+                    entities.SaveChanges();
+                    var sum2 = entities.Dislike.Where(x => x.PostId == postId).Count();
+                    return Json(new { result = sum, result2 = sum2 }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    var sum2 = entities.Dislike.Where(x => x.PostId == postId).Count();
+                    return Json(new { result = sum, result2 = sum2 }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                var sum2 = entities.Dislike.Where(x => x.PostId == postId).Count();
+                var sum = entities.Like.Where(x => x.PostId == postId).Count();
+                return Json(new { result = sum, result2 = sum2, result3 = "Daha önce begendin!" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Dislike(int postId, int userId)
+        {
+            var dahaOnceDislikeVarMi = entities.Dislike.Where(x => x.PostId == postId).Any(x => x.UserId == userId); // boolean değer döndürüyor bize
+            var dahaOnceLikeVarMi = entities.Like.Where(x => x.PostId == postId).Any(x => x.UserId == userId);
+
+            if (dahaOnceDislikeVarMi == false)
+            {
+                Dislike dislike = new Dislike { PostId = postId, UserId = userId };
+                entities.Dislike.Add(dislike);
+                entities.SaveChanges();
+                var sum2 = entities.Dislike.Where(x => x.PostId == postId).Count();
+                if (dahaOnceLikeVarMi == true)
+                {
+                    var dahaOncekiLikenLikeIdsi = entities.Like.FirstOrDefault(x => x.UserId == userId && x.PostId == postId).LikeID;
+                    var eskiLike = entities.Like.Where(x => x.LikeID == dahaOncekiLikenLikeIdsi).Single();
+                    entities.Like.Remove(eskiLike);
+                    entities.SaveChanges();
+                    var sum = entities.Like.Where(x => x.PostId == postId).Count();
+                    return Json(new { result = sum, result2 = sum2 }, JsonRequestBehavior.AllowGet);
+                }
+                else
+                {
+                    var sum = entities.Like.Where(x => x.PostId == postId).Count();
+                    return Json(new { result = sum, result2 = sum2 }, JsonRequestBehavior.AllowGet);
+                }
+
+            }
+            else
+            {
+                var sum2 = entities.Dislike.Where(x => x.PostId == postId).Count();
+                var sum = entities.Like.Where(x => x.PostId == postId).Count();
+                return Json(new { result = sum, result2 = sum2, result3 = "Daha önce dislike yaptın!" }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
     }
 }
