@@ -1,6 +1,6 @@
 ﻿using FikrimVar.Models;
+using PagedList;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web.Mvc;
 
@@ -8,25 +8,25 @@ namespace FikrimVar.Controllers
 {
     public class HomeController : Controller
     {
+        MesajimVarEntities entities = new MesajimVarEntities();
         [Authorize]
-        public ActionResult Index()
+        public ActionResult Index(int? page)
         {
-            ViewData["KullanıcıAdı"] = User.Identity.Name;
-            MesajimVarEntities entities = new MesajimVarEntities();
-            var liste = entities.Mesaj.ToList();
-            return View(liste);
+            var pageNumber = page ?? 1;
+            var pageSize = 10;
+            var mesajlar = entities.Mesaj.OrderBy(x => x.MesajBaslik).ToPagedList(pageNumber, pageSize);
+            return View(mesajlar);
         }
 
         public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";
-
+            ViewData["KullanıcıAdı"] = User.Identity.Name;
             return View();
         }
 
         public ActionResult DetailMessage(int? id)
         {
-            MesajimVarEntities entities = new MesajimVarEntities();
             Mesaj ms = entities.Mesaj.Find(id);
             return View(ms);
         }
@@ -47,7 +47,7 @@ namespace FikrimVar.Controllers
             return View();
         }
 
-        
+
         [HttpPost]
         public ActionResult MesajYolla(Mesajim mesaj)
         {
