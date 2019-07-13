@@ -1,27 +1,29 @@
-﻿@model List<FikrimVar.Mesaj>
+﻿@*model IEnumerable<FikrimVar.Mesaj>*@
 
+@using PagedList;
+@using PagedList.Mvc;
+@model PagedList.IPagedList<Mesaj>
 @{
     ViewBag.Title = "Index";
-    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
-<h2>Tüm Mesajlar</h2>
-
-<table class="table">
-    <tr>
-        <th>
-            Mesaj Başlık
-        </th>
-        <th>
-            Mesaj İçerik
-        </th>
-        <th>
-            Kategorisi
-        </th>
-        <th>
-            Yollayan Kişi
-        </th>
-    </tr>
+<br />
+<table class="table table-hover">
+    <thead class="thead-dark">
+        <tr class="bg-success">
+            <th>
+                Mesaj Başlık
+            </th>
+            <th>
+                Mesaj İcerik
+            </th>
+            <th>
+                Kategori Adı
+            </th>
+            <th>
+                Üye Adı
+            </th>
+        </tr>
+    </thead>
 
     @foreach (var item in Model)
     {
@@ -32,18 +34,20 @@
             <td>
                 @item.MesajIcerik.Substring(0, 20)
                 <a href="/Home/DetailMessage/@item.MesajID">..devamı için tıkla.</a>
-                @* <a href="/a/a/@item.MesajID"></a> *@
-                @*
-                    @Html.DisplayFor(modelItem => item.MesajIcerik)
-                *@
+                @*@Html.DisplayFor(modelItem => item.MesajIcerik)*@
             </td>
             <td>
-                @item.Kategori.KategoriAdi
+                @Html.DisplayFor(modelItem => item.Kategori.KategoriAdi)
             </td>
             <td>
-                @item.Uye.UyeAdi
+                @Html.DisplayFor(modelItem => item.Uye.UyeAdi)
             </td>
         </tr>
     }
 
 </table>
+<div></div>
+Sayfalar @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) / @Model.PageCount
+<div>
+    @Html.PagedListPager(Model, page => Url.Action("Index", new { page = page }))
+</div>
